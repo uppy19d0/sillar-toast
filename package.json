@@ -1,0 +1,41 @@
+{
+  "name": "sillar-toast",
+  "version": "0.1.0",
+  "description": "Accessible, polished toast notifications for React products.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": ["**/*.css"],
+  "files": ["dist", "README.md", "LICENSE"],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./react": { "types": "./dist/react.d.ts", "import": "./dist/react.js" },
+    "./store": { "types": "./dist/store.d.ts", "import": "./dist/store.js" },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-css.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "check": "npm run typecheck && npm run build && npm test"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0",
+    "react-dom": ">=18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "typescript": "^7.0.2"
+  },
+  "publishConfig": { "access": "public" },
+  "author": "@uppy19d0 (https://github.com/uppy19d0)",
+  "repository": { "type": "git", "url": "git+https://github.com/uppy19d0/sillar-toast.git" },
+  "bugs": { "url": "https://github.com/uppy19d0/sillar-toast/issues" },
+  "homepage": "https://github.com/uppy19d0/sillar-toast#readme",
+  "keywords": ["toast", "notification", "react", "a11y", "typescript", "design-system", "dark-mode"]
+}
