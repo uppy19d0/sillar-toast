@@ -12,15 +12,15 @@ export declare function useToast(): ToastApi;
 export interface ToastViewportProps extends React.HTMLAttributes<HTMLOListElement> {
     position?: ToastPosition;
     hotkeyLabel?: string;
+    hotkey?: string[] | null;
     maxToasts?: number;
     removeDelay?: number;
     renderToast?: (toast: ToastRecord) => React.ReactNode;
 }
-export declare function ToastViewport({ position, hotkeyLabel, maxToasts, removeDelay, renderToast, className, ...props }: ToastViewportProps): React.JSX.Element;
+export declare function ToastViewport({ position, hotkeyLabel, hotkey, maxToasts, removeDelay, renderToast, className, tabIndex, ...props }: ToastViewportProps): React.JSX.Element;
 export interface ToastCardProps extends React.HTMLAttributes<HTMLDivElement> {
     toast: ToastRecord;
     store?: ToastStore;
-    removeDelay?: number;
 }
-export declare function ToastCard({ toast, store, removeDelay, className, onMouseEnter, onMouseLeave, onFocus, onBlur, ...props }: ToastCardProps): React.JSX.Element;
+export declare function ToastCard({ toast, store, className, onMouseEnter, onMouseLeave, onFocus, onBlur, onKeyDown, style, ...props }: ToastCardProps): React.JSX.Element;
 //# sourceMappingURL=react.d.ts.map

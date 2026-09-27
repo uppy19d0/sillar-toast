@@ -84,9 +84,26 @@ toast.success('Ready');
 
 - Accessible live regions with `status` and `alert` roles.
 - Dismissible, actionable, promise-aware notifications.
+- Keyboard reachable viewport with `Alt + T` by default.
+- Pause-on-hover/focus timers and animated progress for finite-duration toasts.
+- Exit state support so closed notifications can animate before removal.
 - Light/dark mode through `--slt-*` variables.
 - No Radix, no UI runtime dependency.
 - Global enough for dashboards, SaaS, ecommerce, finance, internal tools, and documentation sites.
+
+## Viewport options
+
+```tsx
+<ToastViewport
+  position="top-center"
+  hotkey={['altKey', 'KeyT']}
+  hotkeyLabel="Product notifications"
+  maxToasts={5}
+  removeDelay={220}
+/>
+```
+
+Set `hotkey={null}` to disable the global shortcut. Use `renderToast` when a design system needs a fully custom card while keeping the Sillar store, provider, and accessibility flow.
 
 ## Development
 

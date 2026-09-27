@@ -57,8 +57,11 @@
 .slt-viewport[data-position$="right"] { right: 1rem; }
 .slt-viewport[data-position$="center"] { left: 50%; transform: translateX(-50%); }
 .slt-viewport__item { pointer-events: auto; }
+.slt-viewport:focus-visible { outline: none; }
+.slt-viewport:focus-visible .slt-toast:first-child { box-shadow: var(--slt-focus), var(--slt-shadow); }
 
 .slt-toast {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: start;
@@ -77,6 +80,7 @@
   backdrop-filter: blur(14px) saturate(1.14);
 }
 .slt-toast[data-state="closed"] { animation: slt-exit 160ms ease-in forwards; }
+.slt-toast[data-paused="true"] .slt-toast__progress { animation-play-state: paused; }
 .slt-toast[data-variant="success"] { --slt-accent: var(--slt-success); --slt-accent-soft: var(--slt-success-soft); }
 .slt-toast[data-variant="info"] { --slt-accent: var(--slt-info); --slt-accent-soft: var(--slt-info-soft); }
 .slt-toast[data-variant="warning"] { --slt-accent: var(--slt-warning); --slt-accent-soft: var(--slt-warning-soft); }
@@ -115,13 +119,25 @@
 .slt-toast__close:hover { background: color-mix(in srgb, var(--slt-accent-soft, var(--slt-brand-soft)) 82%, transparent); }
 .slt-toast__action:focus-visible,
 .slt-toast__close:focus-visible { outline: none; box-shadow: var(--slt-focus); }
+.slt-toast__progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--slt-accent, var(--slt-brand)) 84%, transparent), transparent);
+  animation: slt-progress var(--slt-toast-duration, 5000ms) linear forwards;
+}
 
 @keyframes slt-enter { from { opacity: 0; transform: translateY(0.35rem) scale(0.98); } }
 @keyframes slt-exit { to { opacity: 0; transform: translateY(0.25rem) scale(0.98); } }
 @keyframes slt-pulse { 50% { opacity: 0.56; transform: scale(0.92); } }
+@keyframes slt-progress { to { transform: scaleX(0); } }
 
 @media (prefers-reduced-motion: reduce) {
   .slt-toast,
   .slt-toast[data-state="closed"],
-  .slt-toast[data-variant="loading"] .slt-toast__icon { animation: none; }
+  .slt-toast[data-variant="loading"] .slt-toast__icon,
+  .slt-toast__progress { animation: none; }
 }

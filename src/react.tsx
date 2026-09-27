@@ -19,8 +19,9 @@ export interface ToastProviderProps {
 const ToastContext = React.createContext<ToastStore | null>(null);
 
 export function ToastProvider({ children, store, options }: ToastProviderProps) {
-  const ownedStore = React.useMemo(() => store ?? createToastStore(options), [store, options]);
-  return <ToastContext.Provider value={ownedStore}>{children}</ToastContext.Provider>;
+  const ownedStoreRef = React.useRef<ToastStore | null>(null);
+  if (!ownedStoreRef.current && !store) ownedStoreRef.current = createToastStore(options);
+  return <ToastContext.Provider value={store ?? ownedStoreRef.current ?? defaultToastStore}>{children}</ToastContext.Provider>;
 }
 
 export function useToastStore() {
@@ -40,6 +41,7 @@ export function useToast(): ToastApi {
 export interface ToastViewportProps extends React.HTMLAttributes<HTMLOListElement> {
   position?: ToastPosition;
   hotkeyLabel?: string;
+  hotkey?: string[] | null;
   maxToasts?: number;
   removeDelay?: number;
   renderToast?: (toast: ToastRecord) => React.ReactNode;
@@ -54,30 +56,64 @@ const variantIcons: Record<ToastRecord['variant'], string> = {
   loading: '…',
 };
 
+const DEFAULT_HOTKEY = ['altKey', 'KeyT'];
+
 export function ToastViewport({
   position = 'bottom-right',
   hotkeyLabel = 'Notifications',
+  hotkey = DEFAULT_HOTKEY,
   maxToasts,
   removeDelay = 220,
   renderToast,
   className,
+  tabIndex,
   ...props
 }: ToastViewportProps) {
   const store = useToastStore();
-  const toasts = useToasts().filter((toast) => toast.visible).slice(0, maxToasts);
+  const viewportRef = React.useRef<HTMLOListElement>(null);
+  const allToasts = useToasts();
+  const toasts = allToasts.slice(0, maxToasts);
+
+  React.useEffect(() => {
+    if (!hotkey?.length) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      const matches = hotkey.every((key) => {
+        if (key === 'altKey') return event.altKey;
+        if (key === 'ctrlKey') return event.ctrlKey;
+        if (key === 'metaKey') return event.metaKey;
+        if (key === 'shiftKey') return event.shiftKey;
+        return event.code === key || event.key.toLowerCase() === key.toLowerCase();
+      });
+      if (!matches) return;
+      event.preventDefault();
+      viewportRef.current?.focus();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [hotkey]);
+
+  React.useEffect(() => {
+    const timers = allToasts
+      .filter((toast) => !toast.visible)
+      .map((toast) => window.setTimeout(() => store.remove(toast.id), removeDelay));
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [allToasts, removeDelay, store]);
 
   return (
     <ol
       {...props}
+      ref={viewportRef}
       data-sillar-toast="viewport"
       data-position={position}
+      data-hotkey={hotkey?.join('+') || undefined}
       className={['slt-viewport', className].filter(Boolean).join(' ')}
       aria-label={hotkeyLabel}
       role="region"
+      tabIndex={tabIndex ?? -1}
     >
       {toasts.map((toast) => (
         <li key={toast.id} className="slt-viewport__item">
-          {renderToast ? renderToast(toast) : <ToastCard toast={toast} store={store} removeDelay={removeDelay} />}
+          {renderToast ? renderToast(toast) : <ToastCard toast={toast} store={store} />}
         </li>
       ))}
     </ol>
@@ -87,25 +123,20 @@ export function ToastViewport({
 export interface ToastCardProps extends React.HTMLAttributes<HTMLDivElement> {
   toast: ToastRecord;
   store?: ToastStore;
-  removeDelay?: number;
 }
 
-export function ToastCard({ toast, store = defaultToastStore, removeDelay = 220, className, onMouseEnter, onMouseLeave, onFocus, onBlur, ...props }: ToastCardProps) {
+export function ToastCard({ toast, store = defaultToastStore, className, onMouseEnter, onMouseLeave, onFocus, onBlur, onKeyDown, style, ...props }: ToastCardProps) {
   const [paused, setPaused] = React.useState(false);
   const role = toast.variant === 'danger' ? 'alert' : 'status';
   const live = toast.variant === 'danger' ? 'assertive' : 'polite';
+  const showProgress = Number.isFinite(toast.duration) && toast.duration > 0;
+  const toastStyle = showProgress ? { '--slt-toast-duration': `${toast.duration}ms`, ...style } : style;
 
   React.useEffect(() => {
-    if (paused || !Number.isFinite(toast.duration) || toast.duration <= 0) return;
+    if (!toast.visible || paused || !Number.isFinite(toast.duration) || toast.duration <= 0) return;
     const timer = window.setTimeout(() => store.dismiss(toast.id), toast.duration);
     return () => window.clearTimeout(timer);
-  }, [paused, store, toast.duration, toast.id, toast.updatedAt]);
-
-  React.useEffect(() => {
-    if (toast.visible) return;
-    const timer = window.setTimeout(() => store.remove(toast.id), removeDelay);
-    return () => window.clearTimeout(timer);
-  }, [removeDelay, store, toast.id, toast.visible]);
+  }, [paused, store, toast.duration, toast.id, toast.updatedAt, toast.visible]);
 
   return (
     <div
@@ -113,13 +144,19 @@ export function ToastCard({ toast, store = defaultToastStore, removeDelay = 220,
       data-sillar-toast="toast"
       data-variant={toast.variant}
       data-state={toast.visible ? 'open' : 'closed'}
+      data-paused={paused || undefined}
       role={role}
       aria-live={live}
       className={['slt-toast', className].filter(Boolean).join(' ')}
+      style={toastStyle as React.CSSProperties}
       onMouseEnter={(event) => { setPaused(true); onMouseEnter?.(event); }}
       onMouseLeave={(event) => { setPaused(false); onMouseLeave?.(event); }}
       onFocus={(event) => { setPaused(true); onFocus?.(event); }}
       onBlur={(event) => { setPaused(false); onBlur?.(event); }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') store.dismiss(toast.id);
+        onKeyDown?.(event);
+      }}
     >
       <span className="slt-toast__icon" aria-hidden="true">{toast.icon ?? variantIcons[toast.variant]}</span>
       <div className="slt-toast__body">
@@ -136,6 +173,7 @@ export function ToastCard({ toast, store = defaultToastStore, removeDelay = 220,
           ×
         </button>
       ) : null}
+      {showProgress ? <span className="slt-toast__progress" aria-hidden="true" /> : null}
     </div>
   );
 }
