@@ -52,7 +52,8 @@
     "typescript": "^7.0.2"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "author": "@uppy19d0 (https://github.com/uppy19d0)",
   "repository": {
