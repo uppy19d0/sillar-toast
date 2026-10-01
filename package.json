@@ -1,6 +1,6 @@
 {
   "name": "sillar-toast",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Accessible, polished toast notifications for React products.",
   "license": "MIT",
   "type": "module",
@@ -52,7 +52,8 @@
     "typescript": "^7.0.2"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "author": "@uppy19d0 (https://github.com/uppy19d0)",
   "repository": {
