@@ -3,3 +3,9 @@ node_modules
 dist/*.tsbuildinfo
 *.tgz
 .DS_Store
+
+**/.npmrc
+
+.npm-cache/
+
+.security-artifacts/
