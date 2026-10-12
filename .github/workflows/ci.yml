@@ -24,4 +24,8 @@ jobs:
       - run: npm audit signatures
       - run: npm audit --audit-level=high
       - run: npm run check
+      - name: Test package artifact guard
+        run: node --test scripts/check-package-contents.test.mjs
+      - name: Verify published package contents
+        run: node scripts/check-package-contents.mjs .
       - run: npm pack --dry-run
