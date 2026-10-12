@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+
+- Document package runtime permissions, supply-chain verification and scanner limitations.
+- Gate CI/publication on reviewed artifact contents and add regression checks for packaging risks.
+- Keep reviewed dependency update automation and preserve existing runtime APIs.
+
+
 ## 1.0.0 - 2026-09-27
 
 Initial stable release of Sillar Toast.

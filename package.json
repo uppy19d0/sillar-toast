@@ -1,6 +1,6 @@
 {
   "name": "sillar-toast",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Accessible, polished toast notifications for React products.",
   "license": "MIT",
   "type": "module",
